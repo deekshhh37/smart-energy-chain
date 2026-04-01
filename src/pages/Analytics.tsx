@@ -20,7 +20,7 @@ import {
 export default function Analytics() {
   const weeklyChartData = weeklyUsageData.map((d) => ({
     time: d.day,
-    consumption: d.consumed,
+    consumption: d.consumption,
     solar: d.solar,
     grid: d.grid,
     backup: d.backup,

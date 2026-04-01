@@ -20,11 +20,15 @@ import {
 export default function Analytics() {
   const weeklyChartData = weeklyUsageData.map((d) => ({
     time: d.day,
-    consumption: d.consumption,
+    consumption: d.consumed,
     solar: d.solar,
     grid: d.grid,
     backup: d.backup,
   }));
+
+  const totalConsumed2025 = monthlyUsageData.reduce((s, m) => s + m.consumption, 0);
+  const totalSolar2025 = monthlyUsageData.reduce((s, m) => s + m.solar, 0);
+  const avgMonthly = Math.round(totalConsumed2025 / 12);
 
   return (
     <DashboardLayout>
@@ -42,7 +46,7 @@ export default function Analytics() {
       <div className="mb-8">
         <EnergyLineChart
           data={weeklyChartData}
-          title="Weekly Energy Consumption"
+          title="Weekly Energy Consumption (kWh)"
           showSources={true}
         />
       </div>
@@ -51,19 +55,18 @@ export default function Analytics() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <EnergyBarChart
           data={monthlyUsageData}
-          title="Monthly Consumption (kWh)"
+          title="Monthly Consumption 2025 (kWh)"
           xAxisKey="month"
           dataKeys={[
             { key: "solar", name: "Solar", color: "hsl(var(--energy-solar))" },
             { key: "grid", name: "Grid", color: "hsl(var(--energy-grid))" },
-            { key: "backup", name: "Backup", color: "hsl(var(--energy-backup))" },
           ]}
         />
 
         <Card className="shadow-card animate-fade-in">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-semibold">
-              Peak Usage Hours
+              Hourly Load Pattern (System Avg)
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -83,7 +86,7 @@ export default function Analytics() {
                     className="text-xs fill-muted-foreground"
                     tickLine={false}
                     axisLine={false}
-                    interval={2}
+                    interval={3}
                   />
                   <YAxis
                     className="text-xs fill-muted-foreground"
@@ -102,16 +105,8 @@ export default function Analytics() {
                   />
                   <defs>
                     <linearGradient id="colorUsage" x1="0" y1="0" x2="0" y2="1">
-                      <stop
-                        offset="5%"
-                        stopColor="hsl(var(--primary))"
-                        stopOpacity={0.3}
-                      />
-                      <stop
-                        offset="95%"
-                        stopColor="hsl(var(--primary))"
-                        stopOpacity={0}
-                      />
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <Area
@@ -128,35 +123,31 @@ export default function Analytics() {
         </Card>
       </div>
 
-      {/* Historical Comparison */}
+      {/* Year Summary */}
       <Card className="shadow-card animate-fade-in">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">
-            Year-over-Year Comparison
+            2025 Annual Summary
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="p-4 rounded-xl bg-secondary/50 border border-border">
-              <p className="text-sm text-muted-foreground mb-1">
-                Total Consumption 2025
-              </p>
-              <p className="text-2xl font-bold text-foreground">15,420 kWh</p>
-              <p className="text-sm text-accent mt-1">↓ 12% from 2024</p>
+              <p className="text-sm text-muted-foreground mb-1">Total Consumption 2025</p>
+              <p className="text-2xl font-bold text-foreground">{totalConsumed2025.toLocaleString()} kWh</p>
+              <p className="text-sm text-accent mt-1">From solar generation data</p>
             </div>
             <div className="p-4 rounded-xl bg-secondary/50 border border-border">
-              <p className="text-sm text-muted-foreground mb-1">
-                Average Monthly
-              </p>
-              <p className="text-2xl font-bold text-foreground">1,285 kWh</p>
-              <p className="text-sm text-accent mt-1">↓ 8% from 2024</p>
+              <p className="text-sm text-muted-foreground mb-1">Average Monthly</p>
+              <p className="text-2xl font-bold text-foreground">{avgMonthly.toLocaleString()} kWh</p>
+              <p className="text-sm text-muted-foreground mt-1">Across 12 months</p>
             </div>
             <div className="p-4 rounded-xl bg-secondary/50 border border-border">
-              <p className="text-sm text-muted-foreground mb-1">
-                Solar Contribution
+              <p className="text-sm text-muted-foreground mb-1">Total Solar Adjusted</p>
+              <p className="text-2xl font-bold text-foreground">{totalSolar2025.toLocaleString()} kWh</p>
+              <p className="text-sm text-accent mt-1">
+                {((totalSolar2025 / totalConsumed2025) * 100).toFixed(1)}% solar contribution
               </p>
-              <p className="text-2xl font-bold text-foreground">6,850 kWh</p>
-              <p className="text-sm text-accent mt-1">↑ 24% from 2024</p>
             </div>
           </div>
         </CardContent>

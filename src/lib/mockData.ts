@@ -1,172 +1,269 @@
-// Mock data for Smart Energy Monitoring System
+// Real data from electricity_dummy_10000.csv and solar_power_generation_2025.xlsx
 
+// ============================================
+// USER DASHBOARD DATA (personal/meter level)
+// ============================================
+
+// Last day's hourly data (2024-02-21) from CSV
 export const dailyUsageData = [
-  { time: "00:00", consumption: 1.2, solar: 0, grid: 1.2, backup: 0 },
-  { time: "02:00", consumption: 0.8, solar: 0, grid: 0.8, backup: 0 },
-  { time: "04:00", consumption: 0.6, solar: 0, grid: 0.6, backup: 0 },
-  { time: "06:00", consumption: 1.5, solar: 0.3, grid: 1.2, backup: 0 },
-  { time: "08:00", consumption: 3.2, solar: 1.8, grid: 1.4, backup: 0 },
-  { time: "10:00", consumption: 4.5, solar: 3.5, grid: 1.0, backup: 0 },
-  { time: "12:00", consumption: 5.2, solar: 4.8, grid: 0.4, backup: 0 },
-  { time: "14:00", consumption: 4.8, solar: 4.2, grid: 0.6, backup: 0 },
-  { time: "16:00", consumption: 4.2, solar: 2.8, grid: 1.4, backup: 0 },
-  { time: "18:00", consumption: 5.8, solar: 0.8, grid: 4.5, backup: 0.5 },
-  { time: "20:00", consumption: 4.5, solar: 0, grid: 4.0, backup: 0.5 },
-  { time: "22:00", consumption: 2.8, solar: 0, grid: 2.8, backup: 0 },
+  { time: "00:00", consumption: 32.9, solar: 4.3, grid: 4.3, backup: 0 },
+  { time: "01:00", consumption: 44.0, solar: 5.3, grid: 5.3, backup: 0 },
+  { time: "02:00", consumption: 39.6, solar: 11.9, grid: 11.9, backup: 0 },
+  { time: "03:00", consumption: 43.0, solar: 4.0, grid: 4.0, backup: 0 },
+  { time: "04:00", consumption: 41.0, solar: 6.4, grid: 6.4, backup: 0 },
+  { time: "05:00", consumption: 36.9, solar: 5.6, grid: 5.6, backup: 0 },
+  { time: "06:00", consumption: 40.8, solar: 7.2, grid: 7.2, backup: 0 },
+  { time: "07:00", consumption: 35.3, solar: 9.6, grid: 9.6, backup: 0 },
+  { time: "08:00", consumption: 32.4, solar: 3.1, grid: 3.1, backup: 0 },
+  { time: "09:00", consumption: 43.5, solar: 10.4, grid: 10.4, backup: 0 },
+  { time: "10:00", consumption: 43.6, solar: 5.9, grid: 5.9, backup: 0 },
+  { time: "11:00", consumption: 38.2, solar: 3.1, grid: 3.1, backup: 0 },
+  { time: "12:00", consumption: 38.1, solar: 5.6, grid: 5.6, backup: 0 },
+  { time: "13:00", consumption: 44.4, solar: 8.9, grid: 8.9, backup: 0 },
+  { time: "14:00", consumption: 35.9, solar: 10.6, grid: 10.6, backup: 0 },
+  { time: "15:00", consumption: 35.8, solar: 8.0, grid: 8.0, backup: 0 },
 ];
 
-export const weeklyUsageData = [
-  { day: "Mon", consumption: 42.5, solar: 18.2, grid: 22.3, backup: 2.0 },
-  { day: "Tue", consumption: 38.2, solar: 20.5, grid: 16.7, backup: 1.0 },
-  { day: "Wed", consumption: 45.8, solar: 22.1, grid: 21.7, backup: 2.0 },
-  { day: "Thu", consumption: 41.2, solar: 19.8, grid: 19.4, backup: 2.0 },
-  { day: "Fri", consumption: 48.5, solar: 21.3, grid: 25.2, backup: 2.0 },
-  { day: "Sat", consumption: 52.3, solar: 24.5, grid: 25.8, backup: 2.0 },
-  { day: "Sun", consumption: 35.8, solar: 18.9, grid: 15.4, backup: 1.5 },
-];
-
-export const monthlyUsageData = [
-  { month: "Jan", consumption: 1250, solar: 380, grid: 820, backup: 50 },
-  { month: "Feb", consumption: 1180, solar: 420, grid: 710, backup: 50 },
-  { month: "Mar", consumption: 1320, solar: 580, grid: 690, backup: 50 },
-  { month: "Apr", consumption: 1150, solar: 720, grid: 380, backup: 50 },
-  { month: "May", consumption: 1080, solar: 850, grid: 180, backup: 50 },
-  { month: "Jun", consumption: 1420, solar: 980, grid: 390, backup: 50 },
-  { month: "Jul", consumption: 1580, solar: 1050, grid: 480, backup: 50 },
-  { month: "Aug", consumption: 1620, solar: 1020, grid: 550, backup: 50 },
-  { month: "Sep", consumption: 1380, solar: 780, grid: 550, backup: 50 },
-  { month: "Oct", consumption: 1280, solar: 520, grid: 710, backup: 50 },
-  { month: "Nov", consumption: 1350, solar: 380, grid: 920, backup: 50 },
-  { month: "Dec", consumption: 1420, solar: 320, grid: 1050, backup: 50 },
-];
+// User's today stats derived from last day CSV data
+export const todayStats = {
+  totalConsumption: 625.5, // kWh total consumed
+  solarPercentage: 17.6,   // solar/consumed ratio
+  gridPercentage: 82.4,    // grid portion
+  backupPercentage: 0,
+  costSoFar: 5226.22,     // bill amount for the day (INR)
+  co2Saved: 54.95,        // estimated from solar (0.5 kg per kWh solar)
+  peakUsage: 44.4,        // max hourly consumption
+  averageUsage: 39.1,     // avg hourly consumption
+};
 
 export const energySourceDistribution = [
-  { name: "Solar", value: 45, color: "hsl(var(--energy-solar))" },
-  { name: "Grid", value: 48, color: "hsl(var(--energy-grid))" },
-  { name: "Backup", value: 7, color: "hsl(var(--energy-backup))" },
+  { name: "Solar", value: 18, color: "hsl(var(--energy-solar))" },
+  { name: "Grid", value: 82, color: "hsl(var(--energy-grid))" },
 ];
 
-export const peakHoursData = [
-  { hour: "6 AM", usage: 15 },
-  { hour: "7 AM", usage: 28 },
-  { hour: "8 AM", usage: 45 },
-  { hour: "9 AM", usage: 62 },
-  { hour: "10 AM", usage: 78 },
-  { hour: "11 AM", usage: 85 },
-  { hour: "12 PM", usage: 92 },
-  { hour: "1 PM", usage: 88 },
-  { hour: "2 PM", usage: 82 },
-  { hour: "3 PM", usage: 75 },
-  { hour: "4 PM", usage: 68 },
-  { hour: "5 PM", usage: 72 },
-  { hour: "6 PM", usage: 95 },
-  { hour: "7 PM", usage: 100 },
-  { hour: "8 PM", usage: 88 },
-  { hour: "9 PM", usage: 65 },
-  { hour: "10 PM", usage: 42 },
+// ============================================
+// ANALYTICS PAGE DATA
+// ============================================
+
+// Weekly data aggregated from CSV (last 7 days available: 2024-02-15 to 2024-02-21)
+export const weeklyUsageData = [
+  { day: "Feb 15", consumption: 864, solar: 175, grid: 175, backup: 0 },
+  { day: "Feb 16", consumption: 871, solar: 181, grid: 181, backup: 0 },
+  { day: "Feb 17", consumption: 858, solar: 169, grid: 169, backup: 0 },
+  { day: "Feb 18", consumption: 879, solar: 184, grid: 184, backup: 0 },
+  { day: "Feb 19", consumption: 862, solar: 177, grid: 177, backup: 0 },
+  { day: "Feb 20", consumption: 870, solar: 179, grid: 179, backup: 0 },
+  { day: "Feb 21", consumption: 625, solar: 110, grid: 110, backup: 0 },
 ];
+
+// Monthly data from 2025 solar XLSX (real data)
+export const monthlyUsageData = [
+  { month: "Jan", consumption: 40321, solar: 14400, grid: 14400, generated: 54721, bill: 369496 },
+  { month: "Feb", consumption: 45281, solar: 7296, grid: 7296, generated: 52577, bill: 609971 },
+  { month: "Mar", consumption: 52563, solar: 8672, grid: 8672, generated: 61235, bill: 634061 },
+  { month: "Apr", consumption: 48737, solar: 6600, grid: 6600, generated: 55337, bill: 869373 },
+  { month: "May", consumption: 49277, solar: 3592, grid: 3592, generated: 52869, bill: 887332 },
+  { month: "Jun", consumption: 35403, solar: 10904, grid: 10904, generated: 46307, bill: 457021 },
+  { month: "Jul", consumption: 34159, solar: 6192, grid: 6192, generated: 40351, bill: 684838 },
+  { month: "Aug", consumption: 29544, solar: 5088, grid: 5088, generated: 34632, bill: 1059662 },
+  { month: "Sep", consumption: 30761, solar: 6612, grid: 6612, generated: 37373, bill: 907559 },
+  { month: "Oct", consumption: 38082, solar: 8184, grid: 8184, generated: 46266, bill: 957246 },
+  { month: "Nov", consumption: 42807, solar: 6528, grid: 6528, generated: 49335, bill: 955527 },
+  { month: "Dec", consumption: 38347, solar: 9840, grid: 9840, generated: 48187, bill: 825506 },
+];
+
+// Peak hours from CSV hourly averages
+export const peakHoursData = [
+  { hour: "12 AM", usage: 84 },
+  { hour: "1 AM", usage: 85 },
+  { hour: "2 AM", usage: 84 },
+  { hour: "3 AM", usage: 84 },
+  { hour: "4 AM", usage: 85 },
+  { hour: "5 AM", usage: 85 },
+  { hour: "6 AM", usage: 85 },
+  { hour: "7 AM", usage: 85 },
+  { hour: "8 AM", usage: 84 },
+  { hour: "9 AM", usage: 85 },
+  { hour: "10 AM", usage: 86 },
+  { hour: "11 AM", usage: 85 },
+  { hour: "12 PM", usage: 85 },
+  { hour: "1 PM", usage: 85 },
+  { hour: "2 PM", usage: 85 },
+  { hour: "3 PM", usage: 84 },
+  { hour: "4 PM", usage: 85 },
+  { hour: "5 PM", usage: 86 },
+  { hour: "6 PM", usage: 84 },
+  { hour: "7 PM", usage: 85 },
+  { hour: "8 PM", usage: 85 },
+  { hour: "9 PM", usage: 84 },
+  { hour: "10 PM", usage: 85 },
+  { hour: "11 PM", usage: 85 },
+];
+
+// ============================================
+// BILLING PAGE DATA (from 2025 XLSX)
+// ============================================
 
 export const billingHistory = [
   {
-    id: "BILL-2025-001",
-    month: "January 2025",
-    unitsConsumed: 1250,
-    costPerUnit: 0.12,
-    totalAmount: 150.0,
+    id: "BILL-2025-012",
+    month: "December 2025",
+    unitsConsumed: 38347,
+    costPerUnit: 21.52,
+    totalAmount: 825506,
     status: "Paid",
     transactionHash: "0x8f4e...3b2a",
-    dueDate: "2025-02-15",
-    paidDate: "2025-02-10",
+    dueDate: "2026-01-15",
+    paidDate: "2026-01-10",
   },
   {
-    id: "BILL-2024-012",
-    month: "December 2024",
-    unitsConsumed: 1420,
-    costPerUnit: 0.12,
-    totalAmount: 170.4,
+    id: "BILL-2025-011",
+    month: "November 2025",
+    unitsConsumed: 42807,
+    costPerUnit: 22.32,
+    totalAmount: 955527,
     status: "Paid",
     transactionHash: "0x7d3c...9f1e",
-    dueDate: "2025-01-15",
-    paidDate: "2025-01-08",
+    dueDate: "2025-12-15",
+    paidDate: "2025-12-08",
   },
   {
-    id: "BILL-2024-011",
-    month: "November 2024",
-    unitsConsumed: 1350,
-    costPerUnit: 0.11,
-    totalAmount: 148.5,
+    id: "BILL-2025-010",
+    month: "October 2025",
+    unitsConsumed: 38082,
+    costPerUnit: 25.13,
+    totalAmount: 957246,
     status: "Paid",
     transactionHash: "0x2a1b...4c5d",
-    dueDate: "2024-12-15",
-    paidDate: "2024-12-12",
+    dueDate: "2025-11-15",
+    paidDate: "2025-11-12",
   },
   {
-    id: "BILL-2024-010",
-    month: "October 2024",
-    unitsConsumed: 1280,
-    costPerUnit: 0.11,
-    totalAmount: 140.8,
+    id: "BILL-2025-009",
+    month: "September 2025",
+    unitsConsumed: 30761,
+    costPerUnit: 29.50,
+    totalAmount: 907559,
     status: "Paid",
     transactionHash: "0x9e8f...7a6b",
-    dueDate: "2024-11-15",
-    paidDate: "2024-11-10",
+    dueDate: "2025-10-15",
+    paidDate: "2025-10-10",
+  },
+  {
+    id: "BILL-2025-008",
+    month: "August 2025",
+    unitsConsumed: 29544,
+    costPerUnit: 35.87,
+    totalAmount: 1059662,
+    status: "Paid",
+    transactionHash: "0x3c4d...2e1f",
+    dueDate: "2025-09-15",
+    paidDate: "2025-09-09",
+  },
+  {
+    id: "BILL-2025-007",
+    month: "July 2025",
+    unitsConsumed: 34159,
+    costPerUnit: 20.05,
+    totalAmount: 684838,
+    status: "Paid",
+    transactionHash: "0x5f6a...8b9c",
+    dueDate: "2025-08-15",
+    paidDate: "2025-08-11",
   },
 ];
 
 export const currentBill = {
-  id: "BILL-2025-002",
-  month: "February 2025",
-  unitsConsumed: 1180,
-  costPerUnit: 0.12,
-  solarCredits: 25.5,
-  gridCharges: 141.6,
-  taxes: 8.5,
-  totalAmount: 124.6,
+  id: "BILL-2026-001",
+  month: "January 2026",
+  unitsConsumed: 40321,
+  costPerUnit: 9.16,
+  solarCredits: 14400,
+  gridCharges: 369496,
+  taxes: 18475,
+  totalAmount: 369496,
   status: "Pending",
   transactionHash: "0x4f2a...8c1d",
-  dueDate: "2025-03-15",
-  billingPeriod: "Feb 1 - Feb 28, 2025",
+  dueDate: "2026-02-15",
+  billingPeriod: "Jan 1 - Jan 31, 2026",
 };
 
+// ============================================
+// ADMIN DASHBOARD DATA (system-wide from CSV)
+// ============================================
+
+// Aggregated from 10,000 hourly records across all meters
 export const adminStats = {
   totalUsers: 12458,
   activeUsers: 11250,
-  totalConsumption: 15420000, // kWh
-  averageConsumption: 1238, // kWh per user
-  peakLoad: 8500, // kW
-  peakLoadTime: "7:00 PM - 8:00 PM",
-  solarGeneration: 6850000, // kWh
-  gridUsage: 8120000, // kWh
-  backupUsage: 450000, // kWh
+  totalConsumption: 361256811, // kWh total from CSV
+  averageConsumption: 28993,   // per user monthly avg
+  peakLoad: 44436,            // max hourly consumption from CSV
+  peakLoadTime: "1:00 PM - 2:00 PM",
+  solarGeneration: 74769095,  // total solar from CSV
+  gridUsage: 74769095,        // total grid from CSV (same as solar in this dataset)
+  backupUsage: 0,
+  totalBillAmount: 3230190310, // total billing from CSV
+  totalGenerated: 425078244,   // total generated from CSV
 };
 
-export const userGrowthData = [
-  { month: "Jul", users: 8500 },
-  { month: "Aug", users: 9200 },
-  { month: "Sep", users: 9800 },
-  { month: "Oct", users: 10500 },
-  { month: "Nov", users: 11200 },
-  { month: "Dec", users: 11800 },
-  { month: "Jan", users: 12458 },
+// Monthly system-wide data from CSV (2023)
+export const adminMonthlyData = [
+  { month: "Jan 23", generated: 29824819, consumed: 25436421, grid: 5489802, solar: 5489802, bill: 228978523 },
+  { month: "Feb 23", generated: 27216442, consumed: 23215183, grid: 5093489, solar: 5093489, bill: 208239848 },
+  { month: "Mar 23", generated: 30452218, consumed: 25708435, grid: 5518863, solar: 5518863, bill: 231720718 },
+  { month: "Apr 23", generated: 29686951, consumed: 25408053, grid: 5393289, solar: 5393289, bill: 230301803 },
+  { month: "May 23", generated: 30956918, consumed: 26475437, grid: 5474580, solar: 5474580, bill: 239032419 },
+  { month: "Jun 23", generated: 30269972, consumed: 25542702, grid: 5342724, solar: 5342724, bill: 227783975 },
+  { month: "Jul 23", generated: 31546239, consumed: 26800509, grid: 5510842, solar: 5510842, bill: 239899283 },
+  { month: "Aug 23", generated: 31877617, consumed: 26903814, grid: 5561971, solar: 5561971, bill: 241845794 },
+  { month: "Sep 23", generated: 30983866, consumed: 26498054, grid: 5442732, solar: 5442732, bill: 235459576 },
+  { month: "Oct 23", generated: 32367833, consumed: 27445429, grid: 5684022, solar: 5684022, bill: 244971578 },
+  { month: "Nov 23", generated: 31501817, consumed: 26766720, grid: 5432734, solar: 5432734, bill: 236306648 },
+  { month: "Dec 23", generated: 32953192, consumed: 27889028, grid: 5611516, solar: 5611516, bill: 249024112 },
+  { month: "Jan 24", generated: 33168308, consumed: 28191976, grid: 5536607, solar: 5536607, bill: 247437279 },
+  { month: "Feb 24", generated: 22272052, consumed: 18975050, grid: 3675924, solar: 3675924, bill: 169188754 },
 ];
 
+// System-wide hourly load pattern (averaged from all CSV records)
 export const systemLoadData = [
-  { time: "00:00", load: 2500 },
-  { time: "04:00", load: 1800 },
-  { time: "08:00", load: 4500 },
-  { time: "12:00", load: 6200 },
-  { time: "16:00", load: 5800 },
-  { time: "20:00", load: 8500 },
-  { time: "23:00", load: 4200 },
+  { time: "00:00", load: 36105, generated: 42407, solar: 7603 },
+  { time: "02:00", load: 35883, generated: 42550, solar: 7685 },
+  { time: "04:00", load: 36215, generated: 42610, solar: 7475 },
+  { time: "06:00", load: 36167, generated: 42381, solar: 7548 },
+  { time: "08:00", load: 35676, generated: 42649, solar: 7381 },
+  { time: "10:00", load: 36406, generated: 42505, solar: 7623 },
+  { time: "12:00", load: 36062, generated: 42296, solar: 7352 },
+  { time: "14:00", load: 35995, generated: 42529, solar: 7446 },
+  { time: "16:00", load: 36283, generated: 42424, solar: 7424 },
+  { time: "18:00", load: 35971, generated: 42609, solar: 7349 },
+  { time: "20:00", load: 36221, generated: 42432, solar: 7475 },
+  { time: "22:00", load: 36226, generated: 42725, solar: 7475 },
 ];
 
-export const todayStats = {
-  totalConsumption: 38.2,
-  solarPercentage: 45,
-  gridPercentage: 48,
-  backupPercentage: 7,
-  costSoFar: 4.58,
-  co2Saved: 17.2,
-  peakUsage: 5.8,
-  averageUsage: 1.59,
-};
+// User growth data (keeping simulated growth)
+export const userGrowthData = [
+  { month: "Jul 23", users: 8500 },
+  { month: "Sep 23", users: 9800 },
+  { month: "Nov 23", users: 11200 },
+  { month: "Jan 24", users: 12458 },
+  { month: "Mar 24", users: 13200 },
+  { month: "May 24", users: 14100 },
+  { month: "Jul 24", users: 15300 },
+];
+
+// 2025 solar generation data from XLSX (for admin solar panel)
+export const solarGenerationMonthly = [
+  { month: "Jan", generated: 54721, consumed: 40321, grid: 14400, billed: 19896, bill: 369496 },
+  { month: "Feb", generated: 52577, consumed: 45281, grid: 7296, billed: 46960, bill: 609971 },
+  { month: "Mar", generated: 61235, consumed: 52563, grid: 8672, billed: 49800, bill: 634061 },
+  { month: "Apr", generated: 55337, consumed: 48737, grid: 6600, billed: 81056, bill: 869373 },
+  { month: "May", generated: 52869, consumed: 49277, grid: 3592, billed: 74080, bill: 887332 },
+  { month: "Jun", generated: 46307, consumed: 35403, grid: 10904, billed: 30024, bill: 457021 },
+  { month: "Jul", generated: 40351, consumed: 34159, grid: 6192, billed: 55640, bill: 684838 },
+  { month: "Aug", generated: 34632, consumed: 29544, grid: 5088, billed: 76312, bill: 1059662 },
+  { month: "Sep", generated: 37373, consumed: 30761, grid: 6612, billed: 58620, bill: 907559 },
+  { month: "Oct", generated: 46266, consumed: 38082, grid: 8184, billed: 64656, bill: 957246 },
+  { month: "Nov", generated: 49335, consumed: 42807, grid: 6528, billed: 65064, bill: 955527 },
+  { month: "Dec", generated: 48187, consumed: 38347, grid: 9840, billed: 46560, bill: 825506 },
+];

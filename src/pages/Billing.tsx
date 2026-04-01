@@ -32,7 +32,7 @@ export default function Billing() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <p className="text-primary-foreground/80 text-sm">Current Bill</p>
-              <h2 className="text-3xl font-bold mt-1">${currentBill.totalAmount}</h2>
+              <h2 className="text-3xl font-bold mt-1">₹{currentBill.totalAmount.toLocaleString()}</h2>
               <p className="text-primary-foreground/80 text-sm mt-1">
                 {currentBill.billingPeriod}
               </p>
@@ -57,25 +57,25 @@ export default function Billing() {
             <div>
               <p className="text-sm text-muted-foreground">Units Consumed</p>
               <p className="text-xl font-semibold text-foreground">
-                {currentBill.unitsConsumed} kWh
+                {currentBill.unitsConsumed.toLocaleString()} kWh
               </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Cost per Unit</p>
               <p className="text-xl font-semibold text-foreground">
-                ${currentBill.costPerUnit}
+                ₹{currentBill.costPerUnit}
               </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Solar Credits</p>
               <p className="text-xl font-semibold text-accent">
-                -${currentBill.solarCredits}
+                {currentBill.solarCredits.toLocaleString()} kWh
               </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Taxes & Fees</p>
               <p className="text-xl font-semibold text-foreground">
-                ${currentBill.taxes}
+                ₹{currentBill.taxes.toLocaleString()}
               </p>
             </div>
           </div>
@@ -122,8 +122,8 @@ export default function Billing() {
                 <TableRow>
                   <TableHead>Bill ID</TableHead>
                   <TableHead>Period</TableHead>
-                  <TableHead>Units</TableHead>
-                  <TableHead>Amount</TableHead>
+                  <TableHead>Units (kWh)</TableHead>
+                  <TableHead>Amount (₹)</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Transaction Hash</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -134,8 +134,8 @@ export default function Billing() {
                   <TableRow key={bill.id}>
                     <TableCell className="font-medium">{bill.id}</TableCell>
                     <TableCell>{bill.month}</TableCell>
-                    <TableCell>{bill.unitsConsumed} kWh</TableCell>
-                    <TableCell>${bill.totalAmount.toFixed(2)}</TableCell>
+                    <TableCell>{bill.unitsConsumed.toLocaleString()}</TableCell>
+                    <TableCell>₹{bill.totalAmount.toLocaleString()}</TableCell>
                     <TableCell>
                       <Badge
                         variant="secondary"

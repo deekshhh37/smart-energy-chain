@@ -1,4 +1,4 @@
-import { Zap, Sun, Grid3X3, Battery, TrendingUp, Leaf } from "lucide-react";
+import { Zap, Sun, Grid3X3, TrendingUp, Leaf, IndianRupee } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { EnergyLineChart } from "@/components/dashboard/EnergyLineChart";
@@ -36,22 +36,22 @@ export default function Dashboard() {
         <StatCard
           title="Solar Energy"
           value={`${todayStats.solarPercentage}%`}
-          subtitle={`${(todayStats.totalConsumption * todayStats.solarPercentage / 100).toFixed(1)} kWh generated`}
+          subtitle={`${(todayStats.totalConsumption * todayStats.solarPercentage / 100).toFixed(1)} kWh from solar`}
           icon={Sun}
           variant="solar"
         />
         <StatCard
           title="Grid Usage"
           value={`${todayStats.gridPercentage}%`}
-          subtitle={`${(todayStats.totalConsumption * todayStats.gridPercentage / 100).toFixed(1)} kWh consumed`}
+          subtitle={`${(todayStats.totalConsumption * todayStats.gridPercentage / 100).toFixed(1)} kWh from grid`}
           icon={Grid3X3}
           variant="grid"
         />
         <StatCard
-          title="Backup Power"
-          value={`${todayStats.backupPercentage}%`}
-          subtitle={`${(todayStats.totalConsumption * todayStats.backupPercentage / 100).toFixed(1)} kWh used`}
-          icon={Battery}
+          title="Cost So Far"
+          value={`₹${todayStats.costSoFar.toLocaleString()}`}
+          subtitle="Estimated today"
+          icon={IndianRupee}
           variant="backup"
         />
       </div>
@@ -90,7 +90,7 @@ export default function Dashboard() {
               <p className="text-2xl font-bold text-foreground">
                 {todayStats.peakUsage} kWh
               </p>
-              <p className="text-xs text-muted-foreground">at 6:00 PM</p>
+              <p className="text-xs text-muted-foreground">at 1:00 PM</p>
             </div>
           </div>
         </div>
@@ -116,11 +116,11 @@ export default function Dashboard() {
               <Zap className="w-6 h-6 text-energy-solar" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Cost So Far</p>
+              <p className="text-sm text-muted-foreground">Avg Hourly</p>
               <p className="text-2xl font-bold text-foreground">
-                ${todayStats.costSoFar}
+                {todayStats.averageUsage} kWh
               </p>
-              <p className="text-xs text-muted-foreground">estimated today</p>
+              <p className="text-xs text-muted-foreground">consumption rate</p>
             </div>
           </div>
         </div>

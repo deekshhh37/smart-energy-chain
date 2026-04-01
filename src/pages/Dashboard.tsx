@@ -73,6 +73,11 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* AI Alerts */}
+      <div className="mb-8">
+        <AIAlerts />
+      </div>
+
       {/* Additional Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6">
         <div className="bg-card rounded-xl border p-6 shadow-card animate-fade-in">

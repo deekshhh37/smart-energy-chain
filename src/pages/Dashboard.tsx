@@ -3,6 +3,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { EnergyLineChart } from "@/components/dashboard/EnergyLineChart";
 import { EnergyPieChart } from "@/components/dashboard/EnergyPieChart";
+import { AIAlerts } from "@/components/dashboard/AIAlerts";
 import {
   dailyUsageData,
   energySourceDistribution,

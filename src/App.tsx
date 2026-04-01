@@ -9,6 +9,7 @@ import Analytics from "./pages/Analytics";
 import Billing from "./pages/Billing";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
+import { EnergyChatbot } from "./components/chat/EnergyChatbot";
 
 const queryClient = new QueryClient();
 

@@ -133,6 +133,11 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Energy Data Upload */}
+      <div className="mt-8">
+        <EnergyDataUpload />
+      </div>
     </DashboardLayout>
   );
 }

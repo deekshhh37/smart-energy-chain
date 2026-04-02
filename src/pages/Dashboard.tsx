@@ -4,6 +4,8 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { EnergyLineChart } from "@/components/dashboard/EnergyLineChart";
 import { EnergyPieChart } from "@/components/dashboard/EnergyPieChart";
 import { AIAlerts } from "@/components/dashboard/AIAlerts";
+import { ReportExport } from "@/components/dashboard/ReportExport";
+import { downloadCSV, printReport } from "@/lib/reportExport";
 import {
   dailyUsageData,
   energySourceDistribution,

@@ -13,7 +13,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { EnergyBarChart } from "@/components/dashboard/EnergyBarChart";
 import { ReportExport } from "@/components/dashboard/ReportExport";
-import { EnergyDataUpload } from "@/components/admin/EnergyDataUpload";
+import { downloadCSV, printReport } from "@/lib/reportExport";
 import { downloadCSV, printReport } from "@/lib/reportExport";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {

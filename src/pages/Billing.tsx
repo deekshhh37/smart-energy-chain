@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/table";
 import { currentBill, billingHistory } from "@/lib/mockData";
 import { Badge } from "@/components/ui/badge";
+import { ReportExport } from "@/components/dashboard/ReportExport";
+import { downloadCSV, printReport } from "@/lib/reportExport";
 
 export default function Billing() {
   return (

@@ -54,18 +54,24 @@ export default function Admin() {
   return (
     <DashboardLayout>
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-1">
-          <div className="px-3 py-1 rounded-full bg-destructive/10 text-destructive text-xs font-semibold">
-            ADMIN
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3 mb-1">
+            <div className="px-3 py-1 rounded-full bg-destructive/10 text-destructive text-xs font-semibold">
+              ADMIN
+            </div>
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+              System Administration
+            </h1>
           </div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
-            System Administration
-          </h1>
+          <p className="text-muted-foreground mt-1">
+            System-wide energy monitoring across all meters — powered by real data
+          </p>
         </div>
-        <p className="text-muted-foreground mt-1">
-          System-wide energy monitoring across all meters — powered by real data
-        </p>
+        <ReportExport
+          onExportCSV={() => downloadCSV(solarGenerationMonthly.map(r => ({ ...r, month: `${r.month} 2025` })), "admin-solar-report")}
+          onPrint={() => printReport("Admin System Report")}
+        />
       </div>
 
       {/* Admin Stats Grid */}

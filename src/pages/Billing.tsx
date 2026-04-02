@@ -19,13 +19,19 @@ export default function Billing() {
   return (
     <DashboardLayout>
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
-          Billing & Payments
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          View your electricity bills and payment history
-        </p>
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+            Billing & Payments
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            View your electricity bills and payment history
+          </p>
+        </div>
+        <ReportExport
+          onExportCSV={() => downloadCSV(billingHistory.map(b => ({ Period: b.month, Units: b.unitsConsumed, Amount: b.totalAmount, Status: b.status })), "billing-history")}
+          onPrint={() => printReport("Billing Report")}
+        />
       </div>
 
       {/* Current Bill Card */}

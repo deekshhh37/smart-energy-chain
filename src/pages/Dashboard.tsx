@@ -5,7 +5,6 @@ import { EnergyLineChart } from "@/components/dashboard/EnergyLineChart";
 import { EnergyPieChart } from "@/components/dashboard/EnergyPieChart";
 import { AIAlerts } from "@/components/dashboard/AIAlerts";
 import { ReportExport } from "@/components/dashboard/ReportExport";
-import { EnergyDataUpload } from "@/components/admin/EnergyDataUpload";
 import { downloadCSV, printReport } from "@/lib/reportExport";
 import {
   dailyUsageData,
@@ -133,11 +132,6 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Energy Data Upload */}
-      <div className="mt-8">
-        <EnergyDataUpload />
       </div>
     </DashboardLayout>
   );

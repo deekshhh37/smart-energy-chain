@@ -28,7 +28,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { path: "/analytics", label: "Analytics", icon: BarChart3 },
     { path: "/billing", label: "Billing", icon: Receipt },
-    ...(isAdmin ? [{ path: "/admin", label: "Admin", icon: ShieldCheck }] : []),
   ];
 
   return (

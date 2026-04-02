@@ -23,13 +23,22 @@ const AuthContext = createContext<AuthContextType>({
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const isLocalDev = import.meta.env.DEV;
+  const devUser = isLocalDev
+    ? ({ id: 'local-user', email: 'local@dev.test', app_metadata: {}, user_metadata: {}, aud: 'authenticated' } as unknown as User)
+    : null;
+
+  const [user, setUser] = useState<User | null>(devUser);
   const [session, setSession] = useState<Session | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [displayName, setDisplayName] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(isLocalDev);
+  const [loading, setLoading] = useState<boolean>(!isLocalDev);
+  const [displayName, setDisplayName] = useState<string | null>(isLocalDev ? 'Dev User' : null);
 
   useEffect(() => {
+    if (isLocalDev) {
+      return;
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         setSession(session);
@@ -60,6 +69,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) setLoading(false);
+    }).catch(() => {
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();

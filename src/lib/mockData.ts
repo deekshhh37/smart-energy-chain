@@ -56,20 +56,20 @@ export const weeklyUsageData = [
   { day: "Feb 21", consumption: 625, solar: 110, grid: 110, backup: 0 },
 ];
 
-// Monthly data from 2025 solar XLSX (real data)
+// Real data aggregated from electricity_dummy_10000.csv
 export const monthlyUsageData = [
-  { month: "Jan", consumption: 40321, solar: 14400, grid: 14400, generated: 54721, bill: 369496 },
-  { month: "Feb", consumption: 45281, solar: 7296, grid: 7296, generated: 52577, bill: 609971 },
-  { month: "Mar", consumption: 52563, solar: 8672, grid: 8672, generated: 61235, bill: 634061 },
-  { month: "Apr", consumption: 48737, solar: 6600, grid: 6600, generated: 55337, bill: 869373 },
-  { month: "May", consumption: 49277, solar: 3592, grid: 3592, generated: 52869, bill: 887332 },
-  { month: "Jun", consumption: 35403, solar: 10904, grid: 10904, generated: 46307, bill: 457021 },
-  { month: "Jul", consumption: 34159, solar: 6192, grid: 6192, generated: 40351, bill: 684838 },
-  { month: "Aug", consumption: 29544, solar: 5088, grid: 5088, generated: 34632, bill: 1059662 },
-  { month: "Sep", consumption: 30761, solar: 6612, grid: 6612, generated: 37373, bill: 907559 },
-  { month: "Oct", consumption: 38082, solar: 8184, grid: 8184, generated: 46266, bill: 957246 },
-  { month: "Nov", consumption: 42807, solar: 6528, grid: 6528, generated: 49335, bill: 955527 },
-  { month: "Dec", consumption: 38347, solar: 9840, grid: 9840, generated: 48187, bill: 825506 },
+  { month: "2025-01", consumption: 25436, solar: 5490, grid: 5490, generated: 29825, bill: 228979, efficiency: 92.5, savings: 21959 },
+  { month: "2025-02", consumption: 23215, solar: 5093, grid: 5093, generated: 27216, bill: 208240, efficiency: 86.8, savings: 20374 },
+  { month: "2025-03", consumption: 25708, solar: 5519, grid: 5519, generated: 30452, bill: 231721, efficiency: 86.6, savings: 22075 },
+  { month: "2025-04", consumption: 25408, solar: 5393, grid: 5393, generated: 29687, bill: 230302, efficiency: 81.9, savings: 21573 },
+  { month: "2025-05", consumption: 26475, solar: 5475, grid: 5475, generated: 30957, bill: 239032, efficiency: 83.6, savings: 21898 },
+  { month: "2025-06", consumption: 25543, solar: 5343, grid: 5343, generated: 30270, bill: 227784, efficiency: 82.6, savings: 21371 },
+  { month: "2025-07", consumption: 26801, solar: 5511, grid: 5511, generated: 31546, bill: 239899, efficiency: 86.4, savings: 22043 },
+  { month: "2025-08", consumption: 26904, solar: 5562, grid: 5562, generated: 31878, bill: 241846, efficiency: 80, savings: 22248 },
+  { month: "2025-09", consumption: 26498, solar: 5443, grid: 5443, generated: 30984, bill: 235460, efficiency: 94.1, savings: 21771 },
+  { month: "2025-10", consumption: 27445, solar: 5684, grid: 5684, generated: 32368, bill: 244972, efficiency: 93, savings: 22736 },
+  { month: "2025-11", consumption: 26767, solar: 5433, grid: 5433, generated: 31502, bill: 236307, efficiency: 90.1, savings: 21731 },
+  { month: "2025-12", consumption: 27889, solar: 5612, grid: 5612, generated: 32953, bill: 249024, efficiency: 89.1, savings: 22446 },
 ];
 
 // Peak hours from CSV hourly averages

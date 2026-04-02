@@ -6,6 +6,7 @@ import { downloadCSV, printReport } from "@/lib/reportExport";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import {
   weeklyUsageData,
   monthlyUsageData,
@@ -22,6 +23,11 @@ import {
 } from "recharts";
 
 export default function Analytics() {
+  const [localPrediction, setLocalPrediction] = useState<number | null>(null)
+  const [localAccuracy, setLocalAccuracy] = useState<number | null>(null)
+  const [localConfidence, setLocalConfidence] = useState<string | null>(null)
+  const [localLoading, setLocalLoading] = useState(false)
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['analytics'],
     queryFn: async () => {
@@ -50,6 +56,30 @@ export default function Analytics() {
     },
   });
 
+  const computeLocalPrediction = async () => {
+    if (!data?.monthlyData?.length) return
+
+    setLocalLoading(true)
+    setLocalPrediction(null)
+    setLocalAccuracy(null)
+    setLocalConfidence(null)
+
+    try {
+      const module = await import("@/lib/mlModel")
+      const result = await module.runEnhancedModelPrediction(data.monthlyData.map((m: any) => m.consumption))
+      setLocalPrediction(result.prediction)
+      setLocalAccuracy(result.accuracy)
+      setLocalConfidence(result.confidence)
+    } catch (err) {
+      console.error('Local model prediction error:', err)
+      setLocalPrediction(null)
+      setLocalAccuracy(null)
+      setLocalConfidence('Low')
+    } finally {
+      setLocalLoading(false)
+    }
+  }
+
   if (isLoading) return <DashboardLayout><div>Loading analytics...</div></DashboardLayout>;
 
   const weeklyChartData = data?.weeklyData?.map((d) => ({
@@ -63,7 +93,22 @@ export default function Analytics() {
   const monthlyData2025 = data?.monthlyData?.filter(m => m.month.startsWith('2025-')) || [];
   const totalConsumed2025 = monthlyData2025.reduce((s, m) => s + m.consumption, 0);
   const totalSolar2025 = monthlyData2025.reduce((s, m) => s + m.solar, 0);
-  const avgMonthly = Math.round(totalConsumed2025 / monthlyData2025.length) || 0;
+  const avgMonthly = monthlyData2025.length > 0 ? Math.round(totalConsumed2025 / monthlyData2025.length) : 0;
+  const solarContribution = totalConsumed2025 > 0 ? ((totalSolar2025 / totalConsumed2025) * 100).toFixed(1) : '0.0';
+
+  const nextMonthLabel = (() => {
+    if (monthlyData2025.length === 0) return '2025-01';
+    const [year, month] = monthlyData2025[monthlyData2025.length - 1].month.split('-').map(Number);
+    const next = month === 12 ? 1 : month + 1;
+    const nextYear = month === 12 ? year + 1 : year;
+    return `${nextYear}-${String(next).padStart(2, '0')}`;
+  })();
+
+  const mlPredictionValue = localPrediction ?? data?.prediction ?? 0;
+  const monthlyPredictionData = [
+    ...monthlyData2025.map((m) => ({ time: m.month, consumption: m.consumption })),
+    ...(mlPredictionValue > 0 ? [{ time: nextMonthLabel, consumption: mlPredictionValue }] : []),
+  ];
 
   return (
     <DashboardLayout>
@@ -103,65 +148,11 @@ export default function Analytics() {
             { key: "grid", name: "Grid", color: "hsl(var(--energy-grid))" },
           ]}
         />
-
-        <Card className="shadow-card animate-fade-in">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-semibold">
-              Hourly Load Pattern (System Avg)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={data?.peakHoursData || []}
-                  margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
-                >
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    className="stroke-border"
-                    vertical={false}
-                  />
-                  <XAxis
-                    dataKey="hour"
-                    className="text-xs fill-muted-foreground"
-                    tickLine={false}
-                    axisLine={false}
-                    interval={3}
-                  />
-                  <YAxis
-                    className="text-xs fill-muted-foreground"
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(value) => `${value}%`}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "0.75rem",
-                      boxShadow: "var(--shadow-lg)",
-                    }}
-                    formatter={(value: number) => [`${value}%`, "Load"]}
-                  />
-                  <defs>
-                    <linearGradient id="colorUsage" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <Area
-                    type="monotone"
-                    dataKey="usage"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth={2}
-                    fill="url(#colorUsage)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+        <EnergyLineChart
+          data={monthlyPredictionData}
+          title="ML Forecast - Next Month" 
+          showSources={false}
+        />
       </div>
 
       {/* ML Prediction */}
@@ -178,19 +169,32 @@ export default function Analytics() {
             </p>
             <div className="flex items-center gap-4 text-sm">
               <div>
-                <span className="text-muted-foreground">Model Accuracy: </span>
+                <span className="text-muted-foreground">Server model accuracy: </span>
                 <span className="font-semibold text-foreground">{data?.accuracy || 0}%</span>
               </div>
               <div>
-                <span className="text-muted-foreground">Confidence: </span>
-                <span className={`font-semibold ${
-                  data?.confidence === 'High' ? 'text-green-600' :
-                  data?.confidence === 'Medium' ? 'text-yellow-600' : 'text-red-600'
-                }`}>
-                  {data?.confidence || 'Low'}
-                </span>
+                <span className="text-muted-foreground">Server confidence: </span>
+                <span className="font-semibold text-foreground">{data?.confidence || 'Low'}</span>
               </div>
             </div>
+
+            <div className="pt-4">
+              <button
+                onClick={computeLocalPrediction}
+                disabled={localLoading}
+                className="px-4 py-2 rounded bg-primary text-white hover:bg-primary/90 transition"
+              >
+                {localLoading ? 'Computing local prediction...' : 'Compute local model prediction'}
+              </button>
+            </div>
+
+            {localPrediction !== null && (
+              <div className="rounded-lg border border-border p-3 bg-secondary/70">
+                <p className="text-sm">Local prediction: <span className="font-semibold">{localPrediction} kWh</span></p>
+                <p className="text-sm">Local accuracy: <span className="font-semibold">{localAccuracy}%</span></p>
+                <p className="text-sm">Local confidence: <span className="font-semibold">{localConfidence}</span></p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -218,7 +222,7 @@ export default function Analytics() {
               <p className="text-sm text-muted-foreground mb-1">Total Solar Adjusted</p>
               <p className="text-2xl font-bold text-foreground">{totalSolar2025.toLocaleString()} kWh</p>
               <p className="text-sm text-accent mt-1">
-                {((totalSolar2025 / totalConsumed2025) * 100).toFixed(1)}% solar contribution
+                {solarContribution}% solar contribution
               </p>
             </div>
           </div>

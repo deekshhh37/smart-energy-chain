@@ -65,13 +65,31 @@ Deno.serve(async (req) => {
     if (error) throw error
 
     // Aggregate data
-    const monthlyData: MonthlyData[] = uploads.map(u => ({
+    let monthlyData: MonthlyData[] = uploads.map(u => ({
       month: `${u.year}-${String(u.month).padStart(2, '0')}`,
       consumption: u.consumption_kwh,
       solar: u.solar_kwh,
       grid: u.grid_kwh,
       bill: u.bill_amount
     }))
+
+    // Fallback sample data when user hasn't uploaded anything yet
+    if (monthlyData.length === 0) {
+      monthlyData = [
+        { month: '2025-01', consumption: 140, solar: 45, grid: 90, bill: 70 },
+        { month: '2025-02', consumption: 132, solar: 40, grid: 85, bill: 65 },
+        { month: '2025-03', consumption: 150, solar: 50, grid: 95, bill: 75 },
+        { month: '2025-04', consumption: 160, solar: 55, grid: 100, bill: 80 },
+        { month: '2025-05', consumption: 155, solar: 52, grid: 98, bill: 78 },
+        { month: '2025-06', consumption: 148, solar: 48, grid: 95, bill: 74 },
+        { month: '2025-07', consumption: 170, solar: 60, grid: 100, bill: 85 },
+        { month: '2025-08', consumption: 165, solar: 58, grid: 98, bill: 84 },
+        { month: '2025-09', consumption: 158, solar: 54, grid: 96, bill: 80 },
+        { month: '2025-10', consumption: 152, solar: 50, grid: 94, bill: 77 },
+        { month: '2025-11', consumption: 148, solar: 47, grid: 93, bill: 75 },
+        { month: '2025-12', consumption: 162, solar: 55, grid: 98, bill: 82 },
+      ]
+    }
 
     // For weekly data: approximate last 7 days from last month
     const lastUpload = uploads[0]
@@ -138,68 +156,143 @@ Deno.serve(async (req) => {
 })
 
 async function predictNextMonth(uploads: EnergyData[]): Promise<{prediction: number, accuracy: number, confidence: string}> {
-  if (uploads.length < 4) return {
+  if (uploads.length < 6) return {
     prediction: uploads.length > 0 ? uploads[uploads.length - 1].consumption_kwh : 0,
     accuracy: 0,
     confidence: 'Low (insufficient data)'
   }
 
-  // Prepare data for LSTM
+  // Enhanced data preprocessing
   const data = uploads.map(u => u.consumption_kwh)
-  const windowSize = 3
+  
+  // Add data smoothing and trend analysis
+  const smoothedData = data.map((val, i) => {
+    if (i < 2) return val
+    // Exponential moving average for smoothing
+    const alpha = 0.3
+    return alpha * val + (1 - alpha) * smoothedData[i - 1]
+  })
+  
+  // Calculate trend indicators
+  const trends = smoothedData.map((val, i) => {
+    if (i < 3) return 0
+    return (val - smoothedData[i - 3]) / 3 // 3-month trend
+  })
+  
+  // Normalize data for better training
+  const mean = smoothedData.reduce((a, b) => a + b, 0) / smoothedData.length
+  const std = Math.sqrt(smoothedData.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / smoothedData.length)
+  const normalizedData = smoothedData.map(val => (val - mean) / (std || 1))
+  
+  const windowSize = 4 // Increased window size for better pattern recognition
   const X = []
   const y = []
 
-  for (let i = 0; i < data.length - windowSize; i++) {
-    X.push(data.slice(i, i + windowSize))
-    y.push(data[i + windowSize])
+  for (let i = windowSize; i < normalizedData.length; i++) {
+    const features = [
+      ...normalizedData.slice(i - windowSize, i),
+      trends[i] || 0 // Add trend as additional feature
+    ]
+    X.push(features)
+    y.push(normalizedData[i])
   }
 
-  if (X.length < 2) return {
+  if (X.length < 3) return {
     prediction: data[data.length - 1],
     accuracy: 0,
     confidence: 'Low (minimal data)'
   }
 
-  // Split into train/validation (80/20)
-  const trainSize = Math.floor(X.length * 0.8)
+  // Improved train/validation split (75/25)
+  const trainSize = Math.floor(X.length * 0.75)
   const X_train = X.slice(0, trainSize)
   const y_train = y.slice(0, trainSize)
   const X_val = X.slice(trainSize)
   const y_val = y.slice(trainSize)
 
   // Convert to tensors
-  const xs_train = tf.tensor2d(X_train, [X_train.length, windowSize])
+  const xs_train = tf.tensor2d(X_train, [X_train.length, windowSize + 1]) // +1 for trend feature
   const ys_train = tf.tensor1d(y_train)
-  const xs_val = tf.tensor2d(X_val, [X_val.length, windowSize])
+  const xs_val = tf.tensor2d(X_val, [X_val.length, windowSize + 1])
   const ys_val = tf.tensor1d(y_val)
 
-  // Create LSTM model
+  // Create enhanced LSTM model with multiple layers and regularization
   const model = tf.sequential()
-  model.add(tf.layers.lstm({ units: 10, inputShape: [windowSize, 1] }))
+  
+  // First LSTM layer with return sequences for stacking
+  model.add(tf.layers.lstm({ 
+    units: 64, 
+    inputShape: [windowSize + 1, 1], // +1 for trend feature
+    returnSequences: true,
+    kernel_regularizer: tf.regularizers.l2({ l2: 0.01 }),
+    recurrent_regularizer: tf.regularizers.l2({ l2: 0.01 })
+  }))
+  
+  // Dropout to prevent overfitting
+  model.add(tf.layers.dropout({ rate: 0.2 }))
+  
+  // Second LSTM layer
+  model.add(tf.layers.lstm({ 
+    units: 32,
+    kernel_regularizer: tf.regularizers.l2({ l2: 0.01 }),
+    recurrent_regularizer: tf.regularizers.l2({ l2: 0.01 })
+  }))
+  
+  // Another dropout layer
+  model.add(tf.layers.dropout({ rate: 0.2 }))
+  
+  // Dense layers for better feature extraction
+  model.add(tf.layers.dense({ 
+    units: 16, 
+    activation: 'relu',
+    kernel_regularizer: tf.regularizers.l2({ l2: 0.01 })
+  }))
+  
   model.add(tf.layers.dense({ units: 1 }))
 
-  model.compile({ optimizer: 'adam', loss: 'meanSquaredError' })
-
-  // Train with validation
-  await model.fit(xs_train.reshape([X_train.length, windowSize, 1]), ys_train, {
-    epochs: 50,
-    validationData: [xs_val.reshape([X_val.length, windowSize, 1]), ys_val],
-    verbose: 0
+  // Advanced optimizer with custom learning rate
+  const optimizer = tf.train.adam(0.001)
+  
+  model.compile({ 
+    optimizer: optimizer, 
+    loss: 'meanSquaredError',
+    metrics: ['mae', 'mape']
   })
 
-  // Calculate validation accuracy
-  const val_predictions = model.predict(xs_val.reshape([X_val.length, windowSize, 1])) as tf.Tensor
-  const val_pred_array = val_predictions.dataSync()
-  const val_actual_array = ys_val.dataSync()
+  // Adaptive training with more epochs for better learning
+  const epochs = Math.min(300, Math.max(150, X_train.length * 15))
+  const batchSize = Math.min(16, Math.max(4, Math.floor(X_train.length / 4)))
+  
+  await model.fit(xs_train.reshape([X_train.length, windowSize + 1, 1]), ys_train, {
+    epochs: epochs,
+    batchSize: batchSize,
+    validationData: [xs_val.reshape([X_val.length, windowSize + 1, 1]), ys_val],
+    verbose: 0,
+    callbacks: {
+      onEpochEnd: (epoch, logs) => {
+        // Early stopping if validation loss increases significantly
+        if (epoch > 30 && logs.val_loss > logs.loss * 1.5) {
+          model.stopTraining = true
+        }
+      }
+    }
+  })
 
-  // Calculate MAPE (Mean Absolute Percentage Error)
+  // Calculate validation accuracy with denormalized values
+  const val_predictions = model.predict(xs_val.reshape([X_val.length, windowSize + 1, 1])) as tf.Tensor
+  const val_pred_normalized = val_predictions.dataSync()
+  
+  // Denormalize predictions and actuals for accurate MAPE
+  const val_pred_actual = val_pred_normalized.map(pred => (pred * (std || 1)) + mean)
+  const val_actual_actual = y_val.map(actual => (actual * (std || 1)) + mean)
+  
   let mape_sum = 0
   let valid_predictions = 0
 
-  for (let i = 0; i < val_pred_array.length; i++) {
-    if (val_actual_array[i] !== 0) {
-      mape_sum += Math.abs((val_actual_array[i] - val_pred_array[i]) / val_actual_array[i])
+  for (let i = 0; i < val_pred_actual.length; i++) {
+    const actual = val_actual_actual[i]
+    if (actual !== 0) {
+      mape_sum += Math.abs((actual - val_pred_actual[i]) / actual)
       valid_predictions++
     }
   }
@@ -213,11 +306,16 @@ async function predictNextMonth(uploads: EnergyData[]): Promise<{prediction: num
   else if (accuracy > 60) confidence = 'Medium'
   else confidence = 'Low'
 
-  // Predict next
-  const lastWindow = data.slice(-windowSize)
-  const input = tf.tensor2d([lastWindow], [1, windowSize]).reshape([1, windowSize, 1])
+  // Predict next month (denormalize the prediction)
+  const lastWindow = normalizedData.slice(-windowSize)
+  const lastTrend = trends[trends.length - 1] || 0
+  const inputFeatures = [...lastWindow, lastTrend]
+  const input = tf.tensor2d([inputFeatures], [1, windowSize + 1]).reshape([1, windowSize + 1, 1])
   const prediction_tensor = model.predict(input) as tf.Tensor
-  const predValue = prediction_tensor.dataSync()[0]
+  const normalized_pred = prediction_tensor.dataSync()[0]
+  
+  // Denormalize the prediction
+  const predValue = (normalized_pred * (std || 1)) + mean
 
   // Cleanup
   model.dispose()

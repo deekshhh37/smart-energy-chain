@@ -1,37 +1,63 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Zap, Mail, Key, Eye, EyeOff } from "lucide-react";
+import { Zap, Mail, Key, Eye, EyeOff, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [loginType, setLoginType] = useState<"meter" | "email">("meter");
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) navigate("/dashboard");
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate login
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "Login Successful",
-        description: "Welcome to Smart Energy Monitor!",
+    if (isSignUp) {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { display_name: displayName || email },
+          emailRedirectTo: window.location.origin,
+        },
       });
-      navigate("/dashboard");
-    }, 1500);
+      setIsLoading(false);
+      if (error) {
+        toast({ title: "Sign Up Failed", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Account Created", description: "Please check your email to verify your account before signing in." });
+        setIsSignUp(false);
+      }
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      setIsLoading(false);
+      if (error) {
+        toast({ title: "Login Failed", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Login Successful", description: "Welcome to Smart Energy Monitor!" });
+        navigate("/dashboard");
+      }
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary/30 to-primary/5 p-4">
-      {/* Background Pattern */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-accent/5 rounded-full blur-3xl" />
@@ -39,68 +65,56 @@ export default function Login() {
 
       <Card className="w-full max-w-md relative shadow-card border-border/50 backdrop-blur-sm animate-fade-in">
         <CardHeader className="text-center pb-2">
-          {/* Logo */}
           <div className="mx-auto w-16 h-16 rounded-2xl gradient-primary flex items-center justify-center shadow-lg mb-4">
             <Zap className="w-8 h-8 text-primary-foreground" />
           </div>
           <h1 className="text-2xl font-bold text-foreground">Smart Energy Monitor</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Sign in to manage your energy consumption
+            {isSignUp ? "Create your account" : "Sign in to manage your energy consumption"}
           </p>
         </CardHeader>
 
         <CardContent className="pt-4">
-          {/* Login Type Toggle */}
-          <div className="flex rounded-lg bg-muted p-1 mb-6">
-            <button
-              type="button"
-              onClick={() => setLoginType("meter")}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
-                loginType === "meter"
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Meter ID
-            </button>
-            <button
-              type="button"
-              onClick={() => setLoginType("email")}
-              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
-                loginType === "email"
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Email
-            </button>
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-5">
+            {isSignUp && (
+              <div className="space-y-2">
+                <Label htmlFor="displayName" className="text-sm font-medium">Display Name</Label>
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    <User className="w-5 h-5" />
+                  </div>
+                  <Input
+                    id="displayName"
+                    type="text"
+                    placeholder="John Doe"
+                    className="pl-10 h-12"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
-              <Label htmlFor="identifier" className="text-sm font-medium">
-                {loginType === "meter" ? "Meter ID" : "Email Address"}
-              </Label>
+              <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
               <div className="relative">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                   <Mail className="w-5 h-5" />
                 </div>
                 <Input
-                  id="identifier"
-                  type={loginType === "email" ? "email" : "text"}
-                  placeholder={
-                    loginType === "meter" ? "MTR-XXXX-XXXX" : "your@email.com"
-                  }
+                  id="email"
+                  type="email"
+                  placeholder="your@email.com"
                   className="pl-10 h-12"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium">
-                Password
-              </Label>
+              <Label htmlFor="password" className="text-sm font-medium">Password</Label>
               <div className="relative">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                   <Key className="w-5 h-5" />
@@ -108,38 +122,21 @@ export default function Login() {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
+                  placeholder={isSignUp ? "Min 6 characters" : "Enter your password"}
                   className="pl-10 pr-10 h-12"
                   required
+                  minLength={6}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
-            </div>
-
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="rounded border-input w-4 h-4 text-primary focus:ring-primary"
-                />
-                <span className="text-muted-foreground">Remember me</span>
-              </label>
-              <a
-                href="#"
-                className="text-primary hover:text-primary/80 font-medium transition-colors"
-              >
-                Forgot password?
-              </a>
             </div>
 
             <Button
@@ -150,22 +147,20 @@ export default function Login() {
               {isLoading ? (
                 <span className="flex items-center gap-2">
                   <span className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                  Signing in...
+                  {isSignUp ? "Creating Account..." : "Signing in..."}
                 </span>
-              ) : (
-                "Sign In"
-              )}
+              ) : isSignUp ? "Create Account" : "Sign In"}
             </Button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground mt-6">
-            Don't have an account?{" "}
-            <a
-              href="#"
+            {isSignUp ? "Already have an account? " : "Don't have an account? "}
+            <button
+              onClick={() => setIsSignUp(!isSignUp)}
               className="text-primary hover:text-primary/80 font-medium transition-colors"
             >
-              Contact your provider
-            </a>
+              {isSignUp ? "Sign In" : "Sign Up"}
+            </button>
           </p>
         </CardContent>
       </Card>

@@ -1,6 +1,8 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { EnergyLineChart } from "@/components/dashboard/EnergyLineChart";
 import { EnergyBarChart } from "@/components/dashboard/EnergyBarChart";
+import { ReportExport } from "@/components/dashboard/ReportExport";
+import { downloadCSV, printReport } from "@/lib/reportExport";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   weeklyUsageData,

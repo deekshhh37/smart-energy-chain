@@ -13,21 +13,23 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-const navItems = [
-  { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { path: "/analytics", label: "Analytics", icon: BarChart3 },
-  { path: "/billing", label: "Billing", icon: Receipt },
-  { path: "/admin", label: "Admin", icon: ShieldCheck },
-];
-
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const { isAdmin, displayName, signOut } = useAuth();
+
+  const navItems = [
+    { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { path: "/analytics", label: "Analytics", icon: BarChart3 },
+    { path: "/billing", label: "Billing", icon: Receipt },
+    ...(isAdmin ? [{ path: "/admin", label: "Admin", icon: ShieldCheck }] : []),
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -39,11 +41,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
           <span className="font-semibold text-foreground">EnergyMonitor</span>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-        >
+        <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!sidebarOpen)}>
           {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </Button>
       </header>
@@ -57,7 +55,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         )}
       >
         <div className="flex flex-col h-full">
-          {/* Logo */}
           <div className="h-16 flex items-center gap-3 px-6 border-b border-sidebar-border">
             <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-card">
               <Zap className="w-6 h-6 text-primary-foreground" />
@@ -68,7 +65,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
           </div>
 
-          {/* Navigation */}
           <nav className="flex-1 px-4 py-6 space-y-2">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
@@ -87,12 +83,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 >
                   <item.icon className="w-5 h-5" />
                   <span className="font-medium">{item.label}</span>
+                  {item.path === "/admin" && (
+                    <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-destructive/20 text-destructive font-semibold">
+                      ADMIN
+                    </span>
+                  )}
                 </Link>
               );
             })}
           </nav>
 
-          {/* User Section */}
           <div className="p-4 border-t border-sidebar-border">
             <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-sidebar-accent">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -100,25 +100,24 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-sidebar-foreground truncate">
-                  John Doe
+                  {displayName || "User"}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
-                  Meter: MTR-2024-0892
+                  {isAdmin ? "Administrator" : "User"}
                 </p>
               </div>
             </div>
-            <Link
-              to="/"
-              className="flex items-center gap-3 px-4 py-3 mt-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+            <button
+              onClick={signOut}
+              className="flex items-center gap-3 px-4 py-3 mt-2 w-full rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
             >
               <LogOut className="w-5 h-5" />
               <span className="font-medium">Logout</span>
-            </Link>
+            </button>
           </div>
         </div>
       </aside>
 
-      {/* Mobile Overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-30 bg-foreground/20 backdrop-blur-sm lg:hidden"
@@ -126,7 +125,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         />
       )}
 
-      {/* Main Content */}
       <main className="lg:ml-64 min-h-screen pt-16 lg:pt-0">
         <div className="p-4 lg:p-8">{children}</div>
       </main>

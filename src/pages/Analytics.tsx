@@ -1,6 +1,8 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { EnergyLineChart } from "@/components/dashboard/EnergyLineChart";
 import { EnergyBarChart } from "@/components/dashboard/EnergyBarChart";
+import { ReportExport } from "@/components/dashboard/ReportExport";
+import { downloadCSV, printReport } from "@/lib/reportExport";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   weeklyUsageData,
@@ -33,13 +35,19 @@ export default function Analytics() {
   return (
     <DashboardLayout>
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
-          Energy Analytics
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          Detailed insights into your energy consumption patterns
-        </p>
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+            Energy Analytics
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Detailed insights into your energy consumption patterns
+          </p>
+        </div>
+        <ReportExport
+          onExportCSV={() => downloadCSV(monthlyUsageData, "energy-analytics")}
+          onPrint={() => printReport("Energy Analytics Report")}
+        />
       </div>
 
       {/* Weekly Usage */}

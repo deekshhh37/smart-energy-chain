@@ -14,7 +14,6 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { EnergyBarChart } from "@/components/dashboard/EnergyBarChart";
 import { ReportExport } from "@/components/dashboard/ReportExport";
 import { downloadCSV, printReport } from "@/lib/reportExport";
-import { downloadCSV, printReport } from "@/lib/reportExport";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   adminStats,

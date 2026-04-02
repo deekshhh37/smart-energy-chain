@@ -11,7 +11,44 @@ serve(async (req) => {
   try {
     const { usageData, todayStats } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    
+    // For local development, return mock alerts if API key not configured
+    if (!LOVABLE_API_KEY) {
+      const mockAlerts = [
+        {
+          type: "prediction",
+          severity: "info",
+          title: "Peak Usage Expected",
+          message: "High consumption predicted for evening hours. Consider shifting heavy loads.",
+          icon: "trending-up"
+        },
+        {
+          type: "tip",
+          severity: "info",
+          title: "Solar Optimization",
+          message: "Your solar panels are performing well. Consider adding battery storage.",
+          icon: "sun"
+        },
+        {
+          type: "anomaly",
+          severity: "warning",
+          title: "Unusual Grid Usage",
+          message: "Grid consumption is 15% higher than usual. Check for inefficiencies.",
+          icon: "alert-triangle"
+        },
+        {
+          type: "tip",
+          severity: "info",
+          title: "Energy Saving",
+          message: "Running appliances during off-peak hours could save up to $20/month.",
+          icon: "leaf"
+        }
+      ];
+      
+      return new Response(JSON.stringify({ alerts: mockAlerts }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

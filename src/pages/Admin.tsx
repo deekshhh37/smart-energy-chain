@@ -319,10 +319,6 @@ export default function Admin() {
         </CardContent>
       </Card>
 
-      {/* Energy Data Upload */}
-      <div className="mt-8">
-        <EnergyDataUpload />
-      </div>
     </DashboardLayout>
   );
 }

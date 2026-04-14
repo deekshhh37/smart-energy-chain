@@ -4,7 +4,11 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
+const CHAT_URL = import.meta.env.DEV
+  ? import.meta.env.VITE_CHAT_URL ?? "http://localhost:54321/functions/v1/chat"
+  : import.meta.env.VITE_CHAT_URL ?? (import.meta.env.VITE_SUPABASE_URL ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat` : "");
+
+const CHAT_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -19,14 +23,28 @@ async function streamChat({
   onDone: () => void;
   onError: (err: string) => void;
 }) {
-  const resp = await fetch(CHAT_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-    },
-    body: JSON.stringify({ messages }),
-  });
+  if (!CHAT_URL || !CHAT_KEY) {
+    throw new Error(
+      "Chat service is not configured. Set VITE_CHAT_URL and VITE_SUPABASE_PUBLISHABLE_KEY, or run local Supabase functions at http://localhost:54321."
+    );
+  }
+
+  let resp: Response;
+  try {
+    resp = await fetch(CHAT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${CHAT_KEY}`,
+      },
+      body: JSON.stringify({ messages }),
+    });
+  } catch (err) {
+    onError(
+      `Failed to reach chat service at ${CHAT_URL}. Ensure local Supabase functions are running or set VITE_CHAT_URL.`
+    );
+    return;
+  }
 
   if (!resp.ok) {
     const data = await resp.json().catch(() => ({}));
@@ -118,8 +136,12 @@ export function EnergyChatbot() {
           setLoading(false);
         },
       });
-    } catch {
-      setMessages((prev) => [...prev, { role: "assistant", content: "⚠️ Connection error. Please try again." }]);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: `⚠️ Connection error: ${message}` },
+      ]);
       setLoading(false);
     }
   };

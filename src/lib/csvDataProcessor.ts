@@ -23,6 +23,15 @@ export interface DailyStats {
   generated: number;
 }
 
+export interface MonthlyStats {
+  month: string;
+  consumption: number;
+  solar: number;
+  grid: number;
+  bill: number;
+  generated: number;
+}
+
 export interface DashboardData {
   dailyUsageData: Array<{ time: string; consumption: number; solar: number; grid: number; backup: number }>;
   todayStats: {
@@ -36,6 +45,7 @@ export interface DashboardData {
     averageUsage: number;
   };
   weeklyUsageData: Array<{ day: string; consumption: number; solar: number; grid: number; backup: number }>;
+  monthlyData: MonthlyStats[];
 }
 
 // Parse CSV from string
@@ -72,6 +82,22 @@ export function groupByDay(data: HourlyData[]): Map<string, HourlyData[]> {
     grouped.get(date)!.push(row);
   });
   
+  return grouped;
+}
+
+// Group by month
+export function groupByMonth(data: HourlyData[]): Map<string, HourlyData[]> {
+  const grouped = new Map<string, HourlyData[]>();
+
+  data.forEach(row => {
+    const date = new Date(row.timestamp);
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    if (!grouped.has(monthKey)) {
+      grouped.set(monthKey, []);
+    }
+    grouped.get(monthKey)!.push(row);
+  });
+
   return grouped;
 }
 
@@ -132,6 +158,18 @@ export function processDashboardData(csvData: HourlyData[]): DashboardData {
     grid: stat.grid,
     backup: 0,
   }));
+
+  const monthlyGrouped = groupByMonth(csvData);
+  const monthlyData = Array.from(monthlyGrouped.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([month, rows]) => ({
+      month,
+      consumption: rows.reduce((sum, row) => sum + row.consumed, 0) / 1000,
+      solar: rows.reduce((sum, row) => sum + row.solar_kvah, 0) / 1000,
+      grid: rows.reduce((sum, row) => sum + row.grid, 0) / 1000,
+      bill: rows.reduce((sum, row) => sum + row.bill_amount, 0),
+      generated: rows.reduce((sum, row) => sum + row.generated, 0) / 1000,
+    }));
   
   return {
     dailyUsageData,
@@ -146,6 +184,7 @@ export function processDashboardData(csvData: HourlyData[]): DashboardData {
       averageUsage: averageUsage,
     },
     weeklyUsageData,
+    monthlyData,
   };
 }
 

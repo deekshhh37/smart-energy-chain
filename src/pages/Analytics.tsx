@@ -30,16 +30,11 @@ export default function Analytics() {
         const csvData = await loadCSVData();
         setData({
           weeklyData: csvData.weeklyUsageData,
-          peakHoursData: csvData.dailyUsageData.map((d: any, idx: number) => ({
+          peakHoursData: csvData.dailyUsageData.map((d: any) => ({
             hour: d.time,
             usage: Math.round(d.consumption * 100) / 100
           })),
-          monthlyData: csvData.weeklyUsageData.map((d: any, idx: number) => ({
-            month: `Week ${idx + 1}`,
-            consumption: d.consumption,
-            solar: d.solar,
-            grid: d.grid,
-          })),
+          monthlyData: csvData.monthlyData,
           prediction: 150,
           accuracy: 75,
           confidence: 'Medium'
@@ -96,15 +91,15 @@ export default function Analytics() {
     backup: d.backup,
   })) || [];
 
-  const monthlyData2025 = data?.monthlyData?.filter(m => m.month.startsWith('2025-')) || [];
-  const totalConsumed2025 = monthlyData2025.reduce((s, m) => s + m.consumption, 0);
-  const totalSolar2025 = monthlyData2025.reduce((s, m) => s + m.solar, 0);
-  const avgMonthly = monthlyData2025.length > 0 ? Math.round(totalConsumed2025 / monthlyData2025.length) : 0;
-  const solarContribution = totalConsumed2025 > 0 ? ((totalSolar2025 / totalConsumed2025) * 100).toFixed(1) : '0.0';
+  const monthlyData = data?.monthlyData || [];
+  const totalConsumed = monthlyData.reduce((s, m) => s + m.consumption, 0);
+  const totalSolar = monthlyData.reduce((s, m) => s + m.solar, 0);
+  const avgMonthly = monthlyData.length > 0 ? Math.round(totalConsumed / monthlyData.length) : 0;
+  const solarContribution = totalConsumed > 0 ? ((totalSolar / totalConsumed) * 100).toFixed(1) : '0.0';
 
   const nextMonthLabel = (() => {
-    if (monthlyData2025.length === 0) return '2025-01';
-    const [year, month] = monthlyData2025[monthlyData2025.length - 1].month.split('-').map(Number);
+    if (monthlyData.length === 0) return '2025-01';
+    const [year, month] = monthlyData[monthlyData.length - 1].month.split('-').map(Number);
     const next = month === 12 ? 1 : month + 1;
     const nextYear = month === 12 ? year + 1 : year;
     return `${nextYear}-${String(next).padStart(2, '0')}`;
@@ -112,7 +107,7 @@ export default function Analytics() {
 
   const mlPredictionValue = localPrediction ?? data?.prediction ?? 0;
   const monthlyPredictionData = [
-    ...monthlyData2025.map((m) => ({ time: m.month, consumption: m.consumption })),
+    ...monthlyData.map((m) => ({ time: m.month, consumption: m.consumption })),
     ...(mlPredictionValue > 0 ? [{ time: nextMonthLabel, consumption: mlPredictionValue }] : []),
   ];
 
@@ -129,7 +124,7 @@ export default function Analytics() {
           </p>
         </div>
         <ReportExport
-          onExportCSV={() => downloadCSV(monthlyData2025, "energy-analytics")}
+          onExportCSV={() => downloadCSV(monthlyData, "energy-analytics")}
           onPrint={() => printReport("Energy Analytics Report")}
         />
       </div>
@@ -146,8 +141,8 @@ export default function Analytics() {
       {/* Monthly & Peak Hours Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <EnergyBarChart
-          data={monthlyData2025}
-          title="Monthly Consumption 2025 (kWh)"
+          data={monthlyData}
+          title="Monthly Consumption (kWh)"
           xAxisKey="month"
           dataKeys={[
             { key: "solar", name: "Solar", color: "hsl(var(--energy-solar))" },
@@ -209,24 +204,24 @@ export default function Analytics() {
       <Card className="shadow-card animate-fade-in">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">
-            2025 Annual Summary
+            Annual Summary
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="p-4 rounded-xl bg-secondary/50 border border-border">
-              <p className="text-sm text-muted-foreground mb-1">Total Consumption 2025</p>
-              <p className="text-2xl font-bold text-foreground">{totalConsumed2025.toLocaleString()} kWh</p>
+              <p className="text-sm text-muted-foreground mb-1">Total Consumption</p>
+              <p className="text-2xl font-bold text-foreground">{totalConsumed.toLocaleString()} kWh</p>
               <p className="text-sm text-accent mt-1">From solar generation data</p>
             </div>
             <div className="p-4 rounded-xl bg-secondary/50 border border-border">
               <p className="text-sm text-muted-foreground mb-1">Average Monthly</p>
               <p className="text-2xl font-bold text-foreground">{avgMonthly.toLocaleString()} kWh</p>
-              <p className="text-sm text-muted-foreground mt-1">Across 12 months</p>
+              <p className="text-sm text-muted-foreground mt-1">Across available months</p>
             </div>
             <div className="p-4 rounded-xl bg-secondary/50 border border-border">
               <p className="text-sm text-muted-foreground mb-1">Total Solar Adjusted</p>
-              <p className="text-2xl font-bold text-foreground">{totalSolar2025.toLocaleString()} kWh</p>
+              <p className="text-2xl font-bold text-foreground">{totalSolar.toLocaleString()} kWh</p>
               <p className="text-sm text-accent mt-1">
                 {solarContribution}% solar contribution
               </p>

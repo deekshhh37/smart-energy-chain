@@ -168,13 +168,10 @@ async function testEnhancedModelAccuracy() {
   model.add(tf.layers.dense({ units: 1 }))
 
   const initialLearningRate = 0.001
-  const lrSchedule = tf.callbacks.learningRateScheduler(epoch => {
-    return initialLearningRate * Math.pow(0.95, Math.floor(epoch / 10))
-  })
 
   model.compile({
     optimizer: tf.train.adam(initialLearningRate),
-    loss: 'huberLoss',
+    loss: 'meanSquaredError',
     metrics: ['mae', 'mape']
   })
 
@@ -189,7 +186,6 @@ async function testEnhancedModelAccuracy() {
     batchSize,
     validationData: [xs_test, ys_test],
     verbose: 0,
-    callbacks: [lrSchedule],
   })
 
   // Enhanced evaluation
@@ -251,135 +247,4 @@ async function testEnhancedModelAccuracy() {
 }
 
 // Run the test
-testEnhancedModelAccuracy().catch(console.error)
-
-  // Convert to tensors
-  const xs_train = tf.tensor2d(X_train, [X_train.length, windowSize + 1])
-  const ys_train = tf.tensor1d(y_train)
-  const xs_val = tf.tensor2d(X_val, [X_val.length, windowSize + 1])
-  const ys_val = tf.tensor1d(y_val)
-
-  // Enhanced LSTM model architecture
-  const model = tf.sequential()
-  
-  model.add(tf.layers.lstm({ 
-    units: 64, 
-    inputShape: [windowSize + 1, 1],
-    returnSequences: true,
-    kernel_regularizer: tf.regularizers.l2({ l2: 0.01 }),
-    recurrent_regularizer: tf.regularizers.l2({ l2: 0.01 })
-  }))
-  
-  model.add(tf.layers.dropout({ rate: 0.2 }))
-  
-  model.add(tf.layers.lstm({ 
-    units: 32,
-    kernel_regularizer: tf.regularizers.l2({ l2: 0.01 }),
-    recurrent_regularizer: tf.regularizers.l2({ l2: 0.01 })
-  }))
-  
-  model.add(tf.layers.dropout({ rate: 0.2 }))
-  
-  model.add(tf.layers.dense({ 
-    units: 16, 
-    activation: 'relu',
-    kernel_regularizer: tf.regularizers.l2({ l2: 0.01 })
-  }))
-  
-  model.add(tf.layers.dense({ units: 1 }))
-
-  const optimizer = tf.train.adam(0.001)
-  model.compile({ 
-    optimizer: optimizer, 
-    loss: 'meanSquaredError',
-    metrics: ['mae', 'mape']
-  })
-
-  // Enhanced training
-  const epochs = Math.min(300, Math.max(150, X_train.length * 15))
-  const batchSize = Math.min(16, Math.max(4, Math.floor(X_train.length / 4)))
-  
-  console.log('🎯 Training Enhanced LSTM Model...')
-  console.log(`📈 Epochs: ${epochs}, Batch Size: ${batchSize}`)
-  console.log('🔧 Architecture: 64→32 LSTM + Dense layers + Regularization\n')
-  
-  await model.fit(xs_train.reshape([X_train.length, windowSize + 1, 1]), ys_train, {
-    epochs: epochs,
-    batchSize: batchSize,
-    validationData: [xs_val.reshape([X_val.length, windowSize + 1, 1]), ys_val],
-    verbose: 0,
-    callbacks: {
-      onEpochEnd: (epoch, logs) => {
-        if (epoch > 30 && logs.val_loss > logs.loss * 1.5) {
-          model.stopTraining = true
-        }
-      }
-    }
-  })
-
-  // Enhanced accuracy calculation with denormalization
-  const val_predictions = model.predict(xs_val.reshape([X_val.length, windowSize + 1, 1]))
-  const val_pred_normalized = val_predictions.dataSync()
-  
-  const val_pred_actual = val_pred_normalized.map(pred => (pred * (std || 1)) + mean)
-  const val_actual_actual = y_val.map(actual => (actual * (std || 1)) + mean)
-  
-  let mape_sum = 0
-  let valid_predictions = 0
-  let mse_sum = 0
-
-  console.log('📈 Enhanced Model Validation Results:')
-  console.log('Month | Actual | Predicted | Error | % Error | Status')
-  console.log('------|--------|-----------|-------|--------|--------')
-
-  for (let i = 0; i < val_pred_actual.length; i++) {
-    const actual = val_actual_actual[i]
-    const predicted = val_pred_actual[i]
-    const error = Math.abs(actual - predicted)
-    const percent_error = actual !== 0 ? (error / actual) * 100 : 0
-    const status = percent_error < 10 ? '✅' : percent_error < 20 ? '⚠️' : '❌'
-
-    console.log(`${i + trainSize + windowSize + 1}    | ${actual.toFixed(1)}   | ${predicted.toFixed(1)}     | ${error.toFixed(1)}  | ${percent_error.toFixed(1)}%  | ${status}`)
-
-    if (actual !== 0) {
-      mape_sum += percent_error
-      valid_predictions++
-    }
-    mse_sum += error * error
-  }
-
-  const mape = valid_predictions > 0 ? mape_sum / valid_predictions : 100
-  const mse = mse_sum / val_pred_actual.length
-  const rmse = Math.sqrt(mse)
-  const accuracy = Math.max(0, Math.min(100, 100 - mape))
-
-  console.log(`\n🎯 Enhanced Model Performance Metrics:`)
-  console.log(`• Mean Absolute Percentage Error (MAPE): ${mape.toFixed(2)}%`)
-  console.log(`• Root Mean Square Error (RMSE): ${rmse.toFixed(2)} kWh`)
-  console.log(`• Model Accuracy: ${accuracy.toFixed(2)}%`)
-  console.log(`• Target Achievement: ${accuracy >= 90 ? '✅ SUCCESS' : '❌ NEEDS IMPROVEMENT'}`)
-
-  let confidence = 'Low'
-  if (accuracy > 95) confidence = 'Very High'
-  else if (accuracy > 90) confidence = 'High'
-  else if (accuracy > 80) confidence = 'Medium'
-  else confidence = 'Low'
-
-  console.log(`• Confidence Level: ${confidence}`)
-  console.log(`• Architecture: Multi-layer LSTM with regularization`)
-  console.log(`• Features: Consumption + Trend analysis`)
-  console.log(`• Preprocessing: Exponential smoothing + Normalization`)
-
-  // Cleanup
-  model.dispose()
-  xs_train.dispose()
-  ys_train.dispose()
-  xs_val.dispose()
-  ys_val.dispose()
-  val_predictions.dispose()
-
-  console.log('\n✅ Enhanced accuracy testing complete!')
-  console.log(`🎉 Target: >90% accuracy - Result: ${accuracy.toFixed(2)}%`)
-}
-
 testEnhancedModelAccuracy().catch(console.error)

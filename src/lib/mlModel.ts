@@ -176,9 +176,9 @@ export async function runEnhancedModelPrediction(energyData: number[]): Promise<
 
   // Advanced optimizer with learning rate scheduling
   const initialLearningRate = 0.001
-  const lrSchedule = tf.callbacks.learningRateScheduler(epoch => {
-    return initialLearningRate * Math.pow(0.95, Math.floor(epoch / 10))
-  })
+
+  const epochs = Math.min(500, Math.max(200, X_train.length * 20))
+  const batchSize = Math.min(32, Math.max(8, Math.floor(X_train.length / 3)))
 
   model.compile({
     optimizer: tf.train.adam(initialLearningRate),
@@ -186,16 +186,12 @@ export async function runEnhancedModelPrediction(energyData: number[]): Promise<
     metrics: ['mae', 'mape']
   })
 
-  const epochs = Math.min(500, Math.max(200, X_train.length * 20))
-  const batchSize = Math.min(32, Math.max(8, Math.floor(X_train.length / 3)))
-
   await model.fit(xs_train, ys_train, {
     epochs,
     batchSize,
     validationData: [xs_val, ys_val],
     verbose: 0,
     callbacks: [
-      lrSchedule,
       {
         onEpochEnd: (epoch, logs) => {
           // Early stopping with patience

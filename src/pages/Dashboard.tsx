@@ -6,13 +6,48 @@ import { EnergyPieChart } from "@/components/dashboard/EnergyPieChart";
 import { AIAlerts } from "@/components/dashboard/AIAlerts";
 import { ReportExport } from "@/components/dashboard/ReportExport";
 import { downloadCSV, printReport } from "@/lib/reportExport";
-import {
-  dailyUsageData,
-  energySourceDistribution,
-  todayStats,
-} from "@/lib/mockData";
+import { useState, useEffect } from "react";
+import { loadCSVData } from "@/lib/csvDataProcessor";
+import { energySourceDistribution } from "@/lib/mockData";
 
 export default function Dashboard() {
+  const [dailyUsageData, setDailyUsageData] = useState<any[]>([]);
+  const [todayStats, setTodayStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = await loadCSVData();
+        setDailyUsageData(data.dailyUsageData);
+        setTodayStats(data.todayStats);
+      } catch (error) {
+        console.error("Failed to load CSV data, using defaults:", error);
+        // Fallback to empty state - will show on screen as loading content
+        setDailyUsageData([]);
+        setTodayStats({
+          totalConsumption: 0,
+          solarPercentage: 0,
+          gridPercentage: 100,
+          costSoFar: 0,
+          peakUsage: 0,
+          averageUsage: 0,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="text-center py-12">Loading dashboard data...</div>
+      </DashboardLayout>
+    );
+  }
   return (
     <DashboardLayout>
       {/* Header */}

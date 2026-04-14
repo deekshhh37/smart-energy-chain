@@ -4,14 +4,8 @@ import { EnergyBarChart } from "@/components/dashboard/EnergyBarChart";
 import { ReportExport } from "@/components/dashboard/ReportExport";
 import { downloadCSV, printReport } from "@/lib/reportExport";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { loadCSVData } from "@/lib/csvDataProcessor";
 import { useEffect, useState } from "react";
-import {
-  weeklyUsageData,
-  monthlyUsageData,
-  peakHoursData,
-} from "@/lib/mockData";
 import {
   AreaChart,
   Area,
@@ -27,34 +21,46 @@ export default function Analytics() {
   const [localAccuracy, setLocalAccuracy] = useState<number | null>(null)
   const [localConfidence, setLocalConfidence] = useState<string | null>(null)
   const [localLoading, setLocalLoading] = useState(false)
+  const [data, setData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['analytics'],
-    queryFn: async () => {
+  useEffect(() => {
+    const loadData = async () => {
       try {
-        const { data, error } = await supabase.functions.invoke('analytics');
-        if (error) throw error;
-        return data;
-      } catch (err) {
-        console.warn('Backend not available, using mock data:', err);
-        // Fallback to mock data
-        return {
-          weeklyData: weeklyUsageData.map(d => ({
-            time: d.day,
+        const csvData = await loadCSVData();
+        setData({
+          weeklyData: csvData.weeklyUsageData,
+          peakHoursData: csvData.dailyUsageData.map((d: any, idx: number) => ({
+            hour: d.time,
+            usage: Math.round(d.consumption * 100) / 100
+          })),
+          monthlyData: csvData.weeklyUsageData.map((d: any, idx: number) => ({
+            month: `Week ${idx + 1}`,
             consumption: d.consumption,
             solar: d.solar,
             grid: d.grid,
-            backup: d.backup,
           })),
-          monthlyData: monthlyUsageData,
-          peakHoursData,
-          prediction: 150, // Mock prediction
-          accuracy: 75, // Mock accuracy
-          confidence: 'Medium' // Mock confidence
-        };
+          prediction: 150,
+          accuracy: 75,
+          confidence: 'Medium'
+        });
+      } catch (error) {
+        console.error('Failed to load CSV data:', error);
+        setData({
+          weeklyData: [],
+          peakHoursData: [],
+          monthlyData: [],
+          prediction: 0,
+          accuracy: 0,
+          confidence: 'Low'
+        });
+      } finally {
+        setIsLoading(false);
       }
-    },
-  });
+    };
+
+    loadData();
+  }, []);
 
   const computeLocalPrediction = async () => {
     if (!data?.monthlyData?.length) return

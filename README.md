@@ -1,53 +1,106 @@
-# Welcome to your Lovable project
+# Energy Wise Dashboard
 
-## Project info
+A comprehensive energy monitoring dashboard with AI-powered chat assistance, real-time analytics, and smart energy insights.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## 🚀 Quick Start
 
-## How can I edit this code?
+### Prerequisites
+- Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+### Installation & Setup
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Step 1: Clone the repository
+git clone https://github.com/deekshhh37/energy-wise-dashboard.git
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Step 2: Navigate to the project directory
+cd energy-wise-dashboard
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Step 3: Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 4: Start the chat server (Terminal 1)
+npm run chat-server
+
+# Step 5: Start the development server (Terminal 2)
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Access the Application
+- **Dashboard**: http://localhost:8080/
+- **Chat Server**: http://localhost:54321/functions/v1/chat
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 💬 Chat Features
 
-**Use GitHub Codespaces**
+The AI-powered chatbot provides intelligent responses about:
+- Energy bill reduction tips
+- Peak usage analysis
+- CO₂ savings information
+- General energy consumption insights
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
+Try asking:
+- "How can I reduce my energy bill?"
+- "Why is my peak usage so high?"
+- "How much CO₂ am I saving?"
+
+## 🛠️ Development
+
+### Available Scripts
+- `npm run dev` - Start development server
+- `npm run chat-server` - Start mock chat server
+- `npm run build` - Build for production
+- `npm run test` - Run tests
+
+### Project Structure
+```
+energy-wise-dashboard/
+├── src/
+│   ├── components/
+│   │   ├── chat/          # Chatbot components
+│   │   └── dashboard/     # Dashboard visualizations
+│   ├── pages/             # Main application pages
+│   ├── lib/               # Utilities and data processing
+│   └── contexts/          # React contexts
+├── supabase/
+│   └── functions/         # Edge functions
+├── mock-chat-server.js    # Local chat server
+└── CHAT_README.md         # Detailed chat setup
+```
+
+## 📊 Features
+
+- **Real-time Analytics**: Monthly consumption charts and insights
+- **AI Chat Assistant**: Intelligent energy advice and tips
+- **CSV Data Processing**: Real electricity usage data analysis
+- **Responsive Design**: Works on desktop and mobile devices
+- **Modern UI**: Built with React, TypeScript, and Tailwind CSS
+
+## 🔧 Tech Stack
+
+- **Frontend**: React 18, TypeScript, Vite
+- **UI**: Tailwind CSS, Radix UI components
+- **Charts**: Recharts
+- **Backend**: Supabase Edge Functions
+- **Development**: Mock chat server for local testing
+
+## 📝 Notes
+
+- The mock chat server simulates Supabase Edge Functions for local development
+- No external API keys required for basic functionality
+- Chat responses are streamed like real AI conversations
+- Works completely offline once servers are running
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test locally with both servers running
+5. Submit a pull request
+
+---
+
+**Built with ❤️ using Lovable**
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
 ## What technologies are used for this project?
